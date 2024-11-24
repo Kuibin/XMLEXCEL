@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suscripcion</title>
+    <link rel="icon" type="image/png" href="iconoAX.png" />
+    <!-- CSS Bootstrap v5-->
+    <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" 
+    rel="stylesheet" 
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" 
+    crossorigin="anonymous" />
+
+    <script type="text/javascript" src="https://pay.conekta.com/v1.0/js/conekta-checkout.min.js"></script>
+
+</head>
+<body>
+      <!-- De a webo -->
+  <div class="container">
+    <div class="row">
+        <div class="col12">
+            <!-- Estado de suscripcion -->
+            <div class="row" >
+                <div class="col-md-6 mx-auto mt-2">
+                    <div class="card border-warning">
+                        <div class="card-body">
+                            <h1 class="text-center">Estado de Suscripcion</h1>
+                            <div class="card">
+                              <h5 class="card-title text-uppercase text-success"></h5>
+                              
+                                <h5 class="card-header">Suscripcion</h5>
+                                <div class="card-body"">
+                                  <h5 id="estadoSuscripcion" class="card-title text-uppercase text-success">Estado</h5>
+                                  <h6 id="inicioSuscripcion" class="card-title text-uppercase text-primary">Inicia: </h6>
+                                  <h6 id="finSuscripcion" class="card-title text-uppercase text-primary">Finaliza: </h6>
+                                  <p class="card-text">Tomar alguna accion extra</p>
+                                  <!-- <a href="#" class="btn btn-primary col-md mx-auto mb-1">Actualizar 3 meses</a> -->
+                                  <div class="btn-group" role="group" aria-label="Basic outlined example">
+                                  <a hidden id="btnPausarSus" class="btn btn-primary" onclick= "onPausarSus()">Pausar</a>
+                                  <a hidden id="btnReanudarSus" class="btn btn-primary" onclick = "onReanudarSus()">Reanudar</a>
+                                  <a hidden id="btnCancelarSus" href="#/suscripcionTarjeta" class="btn btn-primary" onclick = "onCancelarSus()">Cancelar</a>
+                                  <a hidden id="btnReactivarSus" href="#/suscripcionTarjeta" class="btn btn-primary" onclick = "onActivarSuscripcion()">Activar con el metodo de pago actual</a>
+                                </div>
+                                </div>
+                                <!--De la base de datos-->
+                                <!-- <div class="card-body" *ngIf="datosClientePHP && !datosCliente?.subscription">
+                                  <h5 class="card-title text-uppercase text-success">Active</h5>
+                                  <h6 class="card-title text-uppercase text-success">Inicia: {{datosClientePHP?.inicioSuscripcion}} </h6>
+                                  <h6 class="card-title text-uppercase text-success">Finaliza: {{datosClientePHP?.finSuscripcion}} </h6>
+                                </div> -->
+                            </div>
+
+                            <div class="card col-md mx-auto mt-2" >
+                                <h5 id="metodoPago" class="card-header text-uppercase">Metodo de pago</h5>
+                                <div class="card-body">
+                                  <h5 id="nombreMetodo" class="card-title">Nombre: </h5>
+                                  <p id="ultimosCuatro" class="card-text">Ultimos cuatro digitos: </p>
+                                  <p id="cardTipo" class="card-text">Tipo: </p>
+                                  <a hidden id="btnEliminarMetodo" type="button" class="btn btn-primary" onclick = "onEliminarMetodoPago()">Eliminar</a>
+                                </div>
+                              </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Planes -->
+<div class="row" >
+  <div class="col-md-6 mx-auto mt-2">
+      <div class="card border-warning">
+          <div class="card-body">
+              <h1 class="text-center mb-2">Planes</h1>
+                  <!-- Botones de Planes-->
+                  <section  class="d-grid gap-2">
+
+                    <input type="radio" class="btn-check" name="options-outlined" id="Prime" autocomplete="off" onclick = "onCambiarPlan('1234')" checked>
+                    <label class="btn btn-lg btn-outline-danger" for="Prime">Facturacion Prime por $500/Mensual</label>
+                    <br>
+                    <input type="radio" class="btn-check" name="options-outlined" id="PrimeAnual" autocomplete="off" onclick = "onCambiarPlan('5678')">
+                    <label class="btn btn-lg btn-outline-danger" for="PrimeAnual">Facturacion Pro por $1,500/Anual</label>
+                    <br>
+                    <!-- <input type="radio" class="btn-check" name="options-outlined" id="PrimePro" autocomplete="off" (click) = "onCambiarPlan('primepro')">
+                    <label class="btn btn-lg btn-outline-danger" for="PrimePro">eRestaurant PrimePro Facturacion por $650/Mensual</label> -->
+                </section>
+          </div>
+      </div>
+  </div>
+</div>
+<!-- Button trigger modal -->
+
+            <!-- Formulario Pasarela Prime-->
+<div class="row" >
+    <div class="col-md-6 mx-auto mt-2">
+        <div class="card border-warning">
+            <div class="card-body">
+                <h1 class="text-center mb-2">Metodos de Suscripcion</h1>
+                    <!-- Tarjeta -->
+                    <section *ngIf="!datosCliente?.payment_sources?.data[0]?.last4">
+                    <h5 class="text-center">Suscripcion por tarjeta</h5>
+                    <h6 class="text-center text-uppercase text-success">*Pagos recurrentes automaticos.</h6>
+                    <div style="text-align:center;">
+                    <svg width="157" height="32" xmlns="http://www.w3.org/2000/svg" ><g fill="#7C869A" fill-rule="evenodd"><path d="M62.814 10.965A16.466 16.466 0 0059 9.546l.05-.297h6.266c.844.032 1.526.301 1.762 1.204l1.362 6.551v.001l.406 1.976 3.804-9.723h4.117l-6.118 14.23-4.112.005-3.364-12.056a.782.782 0 00-.359-.472zM78.32 9.137h3.887l-2.432 14.258h-3.884l2.43-14.258zm15.57.462l-.528 3.09-.348-.165a7.17 7.17 0 00-2.908-.546c-1.522 0-2.226.634-2.226 1.227-.009.667.823 1.108 2.181 1.767 2.242 1.018 3.278 2.252 3.263 3.874-.03 2.96-2.682 4.871-6.767 4.871-1.743-.018-3.421-.363-4.329-.76l.546-3.192.5.226c1.277.533 2.103.749 3.658.749 1.117 0 2.316-.437 2.325-1.393.008-.624-.5-1.07-2.014-1.768-1.474-.682-3.426-1.825-3.405-3.874C83.861 10.934 86.566 9 90.406 9c1.507 0 2.713.31 3.483.599zm9.965-.338L107 23.51h-3.606s-.357-1.637-.473-2.136l-4.977-.007c-.15.386-.818 2.143-.818 2.143h-4.08l5.77-13.066c.41-.929 1.105-1.183 2.036-1.183h3.003zm-3.244 5.205s-1.227 3.164-1.548 3.985h3.225c-.155-.714-.9-4.117-.9-4.117l-.262-1.23c-.196.536-.538 1.4-.515 1.362z" fill-rule="nonzero"/><path d="M156.086 20.736c0 .798-.5 1.183-1.41 1.183l-1.73-.001v-.804h1.724c.168 0 .288-.024.361-.091a.334.334 0 00.106-.247.31.31 0 00-.11-.247c-.067-.057-.158-.081-.312-.086-.837-.024-1.89.029-1.89-1.163 0-.538.342-1.116 1.284-1.114h1.788v.804h-1.637c-.16 0-.27.004-.358.065-.094.06-.131.15-.131.269 0 .14.08.238.196.278a1.1 1.1 0 00.343.044l.48.012c.5.01.825.093 1.026.302.178.185.27.406.27.796zm-3.774-.796c-.202-.21-.528-.292-1.024-.302l-.481-.012a1.111 1.111 0 01-.344-.044.285.285 0 01-.196-.278c0-.119.038-.21.132-.27.088-.06.195-.064.359-.064h1.645v-.804h-1.798c-.942-.002-1.284.576-1.284 1.114 0 1.192 1.052 1.142 1.89 1.163.154.005.245.029.312.086a.31.31 0 01.11.247c0 .106-.046.19-.106.247-.074.067-.193.091-.36.091h-1.74v.804l1.747.001c.907 0 1.408-.385 1.408-1.183 0-.39-.091-.611-.27-.796zm-3.419 1.198l-2.097-.002v-.742l2.047.001v-.772h-2.047v-.677h2.097v-.78H145.9v3.752h2.994v-.78zm-3.952-2.79c-.29-.168-.625-.182-1.079-.182h-2.067v3.752h.896l.001-1.366h.963c.326 0 .522.028.652.164.165.177.145.506.145.729v.473h.902v-.745c0-.325-.022-.498-.147-.68a.99.99 0 00-.442-.319c.237-.093.638-.4.638-.996 0-.42-.175-.666-.462-.83zm-5.076-.182H137l-1.143 1.23-1.1-1.23h-3.609v3.752h3.554l1.145-1.238 1.103 1.238h1.746v-1.256h1.115c.783 0 1.56-.219 1.56-1.257 0-1.039-.798-1.24-1.506-1.24zm4.36 1.54c-.122.07-.267.075-.441.075l-1.092.001v-.836h1.106c.159 0 .32.007.426.064.114.064.183.18.183.338 0 .16-.07.29-.183.358zm-4.368.186h-1.16v-.946h1.168c.323 0 .544.134.544.459 0 .323-.212.487-.552.487zm-3.43.158l1.372-1.478v3.003l-1.373-1.525zm-2.18 1.086h-2.203v-.742l1.964.001v-.772h-1.964v-.677h2.244l.983 1.092-1.024 1.098zm19.364-5.669h-1.276l-1.697-2.812.001 2.812h-1.824l-.346-.84h-1.865l-.345.84h-1.042c-.441 0-.993-.1-1.304-.416-.314-.322-.475-.75-.475-1.433 0-.556.1-1.066.481-1.465.288-.298.746-.44 1.365-.44h.857v.805h-.838c-.332 0-.52.05-.694.223-.159.158-.263.457-.263.85 0 .4.078.688.254.88.133.148.381.192.622.192h.405l1.26-2.95h1.336l1.519 3.55v-3.55h1.37l1.577 2.614v-2.613h.922v3.753zm-11.529 0v-3.754h.919v3.754h-.919zm-.977-3.57c.287.165.462.41.462.831 0 .595-.402.904-.638.996.197.076.366.209.441.318.125.182.148.356.148.68l.001.745h-.903v-.473c0-.224.02-.552-.146-.728-.128-.136-.325-.165-.652-.165h-.962v1.366h-.896v-3.753h2.066c.453 0 .789.016 1.08.183zm-3.766 2.789v.781h-2.995v-3.753h2.995v.782h-2.098v.676h2.048v.771h-2.048v.744l2.098-.001zm-3.663-2.972v3.753h-.92V12.53l-1.3 2.938h-.788l-1.304-2.943.001 2.943h-1.824l-.346-.84h-1.866l-.344.84h-.977l1.606-3.753h1.335l1.519 3.552v-3.552h1.467l1.169 2.545 1.08-2.545h1.492zm14.472 2.132l-.612-1.492-.61 1.492h1.222zm-7.76-.591c.114-.067.183-.197.183-.357 0-.16-.071-.275-.184-.338-.106-.059-.268-.064-.426-.064h-1.105v.834h1.092c.174 0 .318-.004.44-.075zm-14.738.591h1.224l-.612-1.492-.612 1.492zm30.24 3.58h-1.66c-.496 0-.869.115-1.126.301v-.301h-2.449c-.387 0-.856.096-1.075.301v-.301h-4.377v.301c-.351-.246-.937-.301-1.212-.301H141.1v.301c-.276-.265-.883-.301-1.255-.301h-3.24l-.742.803-.689-.803h-4.833v5.231h4.743l.76-.815.72.813 2.92.002v-1.233h.29c.385.001.843-.009 1.24-.181v1.414h2.419v-1.37h.118c.148 0 .158.012.158.152v1.218h7.322c.46 0 .955-.118 1.222-.332v.332h2.322c.481 0 .957-.069 1.316-.24V32H124V16.206h1.53l.346-.839h.772l.346.84h3.014v-.639l.27.64h1.561l.27-.65v.648h7.485v-1.37h.146c.107.001.133.014.133.18v1.19h3.872v-.326c.307.168.793.326 1.436.326h1.63l.35-.839h.772l.346.84h3.131v-.795l.482.794h2.514v-5.23h-2.487v.617l-.357-.616h-2.554v.616l-.315-.616h-3.45c-.581 0-1.094.075-1.499.3v-.3h-2.38v.3c-.27-.228-.621-.3-1.015-.3h-8.701l-.587 1.348-.596-1.348h-2.738v.616l-.309-.616h-2.338l-1.08 2.48V0h31.89v17.426zM41.889 15.999c0 7.168-5.833 13.001-13 13.001-2.99 0-5.747-1.017-7.945-2.718A12.942 12.942 0 0113 29C5.832 29 0 23.167 0 15.999 0 8.83 5.832 3 13 3c2.99 0 5.746 1.013 7.944 2.716A12.929 12.929 0 0128.889 3c7.167 0 13 5.83 13 12.999zm-13-11.837c-2.638 0-5.072.864-7.039 2.322a13.003 13.003 0 013.733 6.246H24.38a11.844 11.844 0 00-3.435-5.504 11.83 11.83 0 00-3.433 5.504h-1.206a13.017 13.017 0 013.735-6.246A11.78 11.78 0 0013 4.162C6.464 4.162 1.165 9.461 1.165 16c0 6.536 5.299 11.836 11.835 11.836 2.638 0 5.072-.864 7.04-2.322a13.034 13.034 0 01-3.614-5.82h1.218a11.824 11.824 0 003.3 5.078 11.818 11.818 0 003.302-5.078h1.218a13.054 13.054 0 01-3.614 5.82 11.778 11.778 0 007.039 2.322c6.536 0 11.835-5.3 11.835-11.836 0-6.538-5.3-11.837-11.835-11.837zm-20.68 9.015H6.315L5.13 16.708l-.05-3.53H3.326l-.954 5.704h1.143l.734-4.358.103 4.358h.832l1.56-4.384-.699 4.384h1.221l.945-5.705zm2.27 3.638a2.367 2.367 0 00-.272-.019c-.692 0-1.042.238-1.042.705 0 .29.172.473.436.473.499 0 .856-.473.878-1.16zm.888 2.067h-1.012l.023-.481c-.308.38-.72.562-1.279.562-.662 0-1.114-.518-1.114-1.266 0-1.132.787-1.789 2.142-1.789.139 0 .316.013.498.036.037-.154.047-.219.047-.302 0-.306-.212-.422-.783-.422a3.992 3.992 0 00-1.292.21l.17-1.044c.608-.179 1.01-.246 1.46-.246 1.049 0 1.604.47 1.603 1.36.001.238-.038.532-.099.92-.106.67-.333 2.11-.364 2.462zm15.944-5.845c-1.617 0-2.749 1.424-2.749 3.464 0 1.515.82 2.462 2.133 2.462.337 0 .63-.044 1.078-.169l.214-1.298c-.403.198-.735.293-1.037.293-.71 0-1.137-.524-1.137-1.39 0-1.257.637-2.137 1.549-2.137.338 0 .655.088 1.09.309l.2-1.238c-.179-.07-.808-.296-1.34-.296zm3.518 3.778a2.353 2.353 0 00-.274-.019c-.691 0-1.041.238-1.041.705 0 .29.171.473.438.473.497 0 .856-.473.877-1.16zm.887 2.067h-1.01l.023-.481c-.31.38-.722.562-1.28.562-.662 0-1.116-.518-1.116-1.266 0-1.132.79-1.789 2.143-1.789.139 0 .317.013.499.036.037-.154.046-.219.046-.302 0-.306-.211-.422-.78-.422a3.984 3.984 0 00-1.293.21l.169-1.044c.608-.179 1.01-.246 1.459-.246 1.05 0 1.605.47 1.603 1.36.003.238-.037.532-.098.92-.105.67-.333 2.11-.365 2.462zm-14.35-1.097c-.081.028-.19.044-.328.044-.29 0-.419-.104-.419-.344.003-.147.204-1.245.344-2.126h.626l.166-1.115h-.624l.142-.7H16.06s-.46 2.73-.528 3.162c-.078.494-.176 1.032-.169 1.237 0 .66.34 1.02.964 1.02.283 0 .544-.047.878-.15l.161-1.028zm3.733.991a4.19 4.19 0 01-1.245.187c-1.36-.003-2.068-.712-2.068-2.07 0-1.586.902-2.753 2.125-2.753 1 0 1.64.653 1.64 1.68 0 .34-.046.67-.15 1.141h-2.416c-.082.67.349.951 1.055.951.434 0 .825-.088 1.26-.29l-.2 1.154zm-.682-2.751c.008-.096.128-.83-.564-.83-.387 0-.665.297-.776.83h1.34zm-8.112-.316c0 .588.283.991.928 1.296.495.234.571.301.571.513 0 .288-.218.417-.702.417-.363 0-.703-.054-1.093-.181 0 0-.16 1.022-.169 1.071.28.06.526.117 1.271.138 1.288 0 1.883-.492 1.883-1.55 0-.64-.248-1.01-.86-1.292-.511-.236-.571-.288-.571-.505 0-.252.204-.379.6-.379.238 0 .566.026.875.07l.174-1.076a8.403 8.403 0 00-1.075-.091c-1.365 0-1.837.712-1.832 1.57zm26.286 3.173h-1.156l.059-.432c-.336.357-.68.513-1.126.513-.888 0-1.474-.764-1.474-1.924 0-1.545.91-2.845 1.986-2.845.472 0 .833.192 1.166.632l.27-1.649h1.204l-.929 5.705zm-1.801-1.07c.568 0 .968-.646.968-1.564 0-.59-.226-.91-.647-.91-.554 0-.947.645-.947 1.557 0 .608.21.916.626.916zm-3.766-3.568c-.153 1.434-.424 2.888-.636 4.326l-.055.312h1.219c.437-2.837.543-3.39 1.227-3.32.109-.583.311-1.09.464-1.347-.512-.106-.798.184-1.17.733.03-.239.083-.468.072-.704h-1.121zm-10.669 0c-.153 1.434-.425 2.888-.637 4.326l-.056.312h1.22c.438-2.837.543-3.39 1.227-3.32.11-.583.313-1.09.464-1.347-.51-.106-.798.184-1.17.733.03-.239.083-.468.073-.704h-1.12zm17.16 4.878c.233 0 .423-.19.423-.42a.421.421 0 00-.841 0c0 .23.187.42.418.42zm-.32-.42a.32.32 0 01.32-.32c.179 0 .319.144.319.32a.319.319 0 11-.639 0zm.265.182h-.085v-.366h.156c.03 0 .064 0 .093.018a.11.11 0 01.047.09.1.1 0 01-.066.097l.068.16h-.096l-.055-.142h-.062v.143zm0-.207h.047c.018 0 .036 0 .052-.007.016-.01.02-.028.02-.043a.047.047 0 00-.02-.039c-.013-.008-.04-.005-.055-.005h-.044v.094zm.695 4.571c0-.23.19-.42.42-.42.232 0 .421.19.421.42 0 .231-.19.42-.42.42a.422.422 0 01-.42-.42zm.42.32a.323.323 0 00.322-.32.321.321 0 00-.321-.319.32.32 0 000 .639zm-.056-.283h.062l.057.148h.096l-.067-.164a.102.102 0 00.065-.095.126.126 0 00-.047-.093c-.029-.02-.065-.02-.096-.02h-.156v.372h.086v-.148zm.046-.156c.016 0 .04-.003.052.005.013.01.024.023.024.04a.052.052 0 01-.024.043c-.013.007-.033.007-.05.007h-.048v-.095h.046z"/></g></svg>
+                  </div>
+                                  <!-- Datos usuario-->
+          <form class="row g-1" >
+            <div class="mb-3">
+              <label for="nombreUser" class="form-label">Nombre</label>
+              <input type="text" class="form-control is-valid" id="nombreUser" value="0" required>
+              <div id="nombreUserFeedback" class="valid-feedback">
+                Bien!
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="emailUser" class="form-label">E-mail</label>
+              <input type="email" class="form-control is-valid" id="emailUser" value="0" required>
+              <div id="emailUserFeedback" class="valid-feedback">
+                Bien!
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="telefonoUser" class="form-label">Telefono</label>
+              <input type="tel" class="form-control is-invalid" id="telefonoUser" aria-describedby="telefonoUserFeedback"
+              placeholder="(Código de área) Número" required>
+              <div id="telefonoUserFeedback" name="telefonoUserFeedback" class="invalid-feedback">
+                Por favor introduzca un telefono valido.
+              </div>
+            </div>
+            
+            <div class="d-grid gap-2 mt-3"> 
+              <button id="Agregar" class="btn btn-lg btn-danger"  type="button" onclick="crearTokenVacio()">
+                  Agregar Tarjeta
+              </button>
+            </div>
+            <!-- <div class="d-grid gap-2 mt-3"> 
+              <button id="Suscribirse" type="button" class="btn btn-lg btn-danger" onclick="SuscribirseCliente()" disabled>
+                  Suscribir Tarjeta
+              </button>
+              </div> -->
+            <!-- <div class="col-12">
+              <button class="btn btn-primary" type="submit">Submit form</button>
+            </div> -->
+          </form>
+          <!-- fin -->
+                    <!-- <div class="d-grid gap-2 mt-3">
+                        <button type="button" class="btn btn-lg btn-danger" (click)="modalabrir()" data-bs-toggle="modal" data-bs-target="#tarjetaModal">
+                            Agregar Nueva Tarjeta
+                        </button>
+                    </div> -->
+                    </div>
+                  </section>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Tokenizar tarjeta -->
+<!-- Modal -->
+<div class="modal fade" id="tarjetaModal" name="tarjetaModal" tabindex="-1" aria-labelledby="tarjetaModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Agregue Datos de Tarjeta</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">	
+          <div id="conektaIframeContainer" style="height: 1350px;"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+  
+  <!-- <input type="hidden" id="nombreUser" name="nombreUser" value="0">
+  <input type="hidden" id="emailUser" name="emailUser" value="0">
+  <input type="hidden" id="telefonoUser" name="telefonoUser" value="0"> -->
+  <input type="hidden" id="facturasUser" name="facturasUser" value="0">
+  <input type="hidden" id="tokenVacio" name="tokenVacio" value="0">
+  <input type="hidden" id="idConektaUser" name="idConektaUser" value="0">
+  <input type="hidden" id="ultimos4tarjeta" name="ultimos4tarjeta" value="0">
+  <input type="hidden" id="planActual" name="planActual" value="0">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" 
+    integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" 
+    crossorigin="anonymous">
+    </script>
+
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.8.4/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.8.4/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+  import { getAuth ,GoogleAuthProvider, signInWithRedirect, getRedirectResult, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.8.4/firebase-auth.js";
+
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyBzCgu1wNiB08mnv4slEPkqBVNirhcCZsA",
+    authDomain: "axcontable-62b4a.firebaseapp.com",
+    projectId: "axcontable-62b4a",
+    storageBucket: "axcontable-62b4a.appspot.com",
+    messagingSenderId: "766323497235",
+    appId: "1:766323497235:web:3c748b81b6fca2ce32e2e6",
+    measurementId: "G-3YTELNCFWG"
+  };
+
+   // Initialize Firebase
+   const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider(app);
+
+  auth.onAuthStateChanged(function(user) {
+  if (user) {
+    document.getElementById("emailUser").value = user.email;
+    $.ajax({
+      method: "POST",
+      url: "_ConsultarUsuarioBD.php",
+      dataType:"json",
+      data: { email:user.email }
+    })
+      .done(function( response ) {
+        // $("p.broken").html(response);
+        //  console.log(response);
+        $("#nombreUser").val(response.nombre);
+        $("#telefonoUser").val(response.telefono);
+        $("#facturasUser").val(response.facturas);
+        $("#idConektaUser").val(response.idConekta);
+
+        if (response.telefono != 0 || response.telefono != "0"){
+          document.getElementById("telefonoUser").classList.remove('is-invalid');
+          document.getElementById("telefonoUser").classList.add("is-valid");
+          
+           document.getElementById("telefonoUserFeedback").innerHTML = '<span style="color: green;">Bien!</span>';
+           
+           $("#telefonoUserFeedback").removeClass('invalid-feedback');
+           $("#telefonoUserFeedback").addClass('valid-feedback');
+        }
+        //si tiene id, recuperamos su susripcion
+        if (response.idConekta != 0 || response.idConekta != "0"){
+          $.ajax({
+          method: "POST",
+          url: "_obtenerSuscripcionClienteDirecto.php",
+          dataType:"json",
+          data: { idConekta: response.idConekta}
+          })
+          .done(function( responseConekta ) {
+            // console.log(responseConekta);
+            if (responseConekta.subscription.status == "active"){
+              // document.getElementById('Suscribirse').disabled=true; 
+              document.getElementById('Agregar').disabled=true; 
+              document.getElementById("estadoSuscripcion").innerHTML = '<h5 class="card-title text-uppercase text-success">'+responseConekta.subscription.status+'</h5>';
+              document.getElementById('planActual').value = responseConekta.subscription.plan_id;
+
+              document.getElementById("inicioSuscripcion").innerHTML = '<h6 class="card-title text-uppercase text-primary">Inicia: '+new Date(responseConekta.subscription.billing_cycle_start * 1000)+ '</h6>';
+              document.getElementById("finSuscripcion").innerHTML = '<h6 class="card-title text-uppercase text-primary">Finaliza: '+ new Date(responseConekta.subscription.billing_cycle_end * 1000)+' </h6>';
+              
+              document.getElementById("btnPausarSus").hidden = false;
+              document.getElementById("btnCancelarSus").hidden = false;
+              document.getElementById("btnReanudarSus").hidden = true;
+              document.getElementById("btnReactivarSus").hidden = true;
+            }
+            if (responseConekta.subscription.status == "paused"){
+              document.getElementById("btnPausarSus").hidden = true;
+              document.getElementById("btnCancelarSus").hidden = true;
+              document.getElementById("btnReanudarSus").hidden = false;
+              document.getElementById("btnReactivarSus").hidden = true;
+            }
+            if (responseConekta.subscription.status == "canceled" && responseConekta.payment_sources.data[0].last4 != null){
+              document.getElementById("btnPausarSus").hidden = true;
+              document.getElementById("btnCancelarSus").hidden = true;
+              document.getElementById("btnReanudarSus").hidden = true;
+              document.getElementById("btnReactivarSus").hidden = false;
+            }
+
+            if (responseConekta.payment_sources != null || responseConekta.payment_sources != undefined){
+              document.getElementById("metodoPago").innerHTML = '<h5 class="card-header text-uppercase">Metodo de pago '+responseConekta.payment_sources.data[0].brand+'</h5>';
+              document.getElementById("nombreMetodo").innerHTML = '<h5 class="card-title">Nombre: '+responseConekta.payment_sources.data[0].name+'</h5>';
+              document.getElementById("ultimosCuatro").innerHTML = '<p class="card-text">Ultimos cuatro digitos: '+responseConekta.payment_sources.data[0].last4+'</p>';
+              document.getElementById("cardTipo").innerHTML = '<p class="card-text">Tipo: '+responseConekta.payment_sources?.data[0].card_type+'</p>';
+              if (responseConekta.payment_sources.data[0].last4){
+              document.getElementById("btnEliminarMetodo").hidden = false;
+              document.getElementById("ultimos4tarjeta").value = responseConekta.payment_sources.data[0].last4;
+              }else{
+                document.getElementById('Agregar').disabled=false; 
+              }
+            }else{//si no hay metodo de pago, habilitamos el boton para agregar tarjeta
+                document.getElementById('Agregar').disabled=false; 
+              }
+          });
+          
+        }
+ 
+      });
+    // El usuario está logueado, realiza acciones aquí
+    alert("Bienvenido " + user.displayName);
+  } else {
+      //  console.log("usuario nullo");
+      //  location.replace("index.html");
+      //  alert("no ta logiao");
+      //  window.location.replace("../Login.html");
+  }
+
+});
+
+</script>
+
+<script type="text/javascript">
+
+// modalabrir = function(){
+//     console.log("abre modal");
+//     var myModal = new bootstrap.Modal(document.getElementById('tarjetaModal'), {
+//                   keyboard: false
+//         });
+//         myModal.show();
+//         // var modalToggle = document.getElementById('tarjetaModal') // relatedTarget
+//         // myModal.show(modalToggle)
+//   }
+
+let checkID = 0;
+let tokenID = 0;
+let planID = '1234';//plan prime por defecto
+let nombreU = document.getElementById("nombreUser").value;
+let emailU = document.getElementById("emailUser").value;
+let telefonoU = document.getElementById("telefonoUser").value;
+let conekta = document.getElementById("idConektaUser").value;
+let planUsuario = document.getElementById('planActual').value;
+
+onCambiarPlan = function(planSeleccionado){
+  planID = planSeleccionado;
+  console.log(planID);
+}
+
+SuscribirseCliente = function(){
+  console.log("suscribinedo");
+  telefonoU = document.getElementById("telefonoUser").value;
+  nombreU = document.getElementById("nombreUser").value;
+  emailU = document.getElementById("emailUser").value;
+  conekta = document.getElementById("idConektaUser").value;
+
+  if (conekta == 0 || conekta == "0"){
+    // console.log("conekta id " + conekta +nombreU + emailU+telefonoU+tokenID+planID);
+      $.ajax({
+      method: "POST",
+      url: "_CrearClienteSuscribir.php",
+      data: { nombre:nombreU, email:emailU, telefono:telefonoU, token_id: tokenID, plan: planID},
+      dataType:"json"
+      })
+        .done(function( response ) {
+          // console.log("suscripcion: " + response.id);
+          document.getElementById("idConektaUser").value = response.id
+          ////
+          $.ajax({
+          method: "POST",
+          url: "_actualizarClienteBD.php",
+          data: { email:emailU, telefono:telefonoU, conektaID: response.id},
+          dataType:"json"
+          })
+            .done(function( response2 ) {
+              // console.log("suscripcion: " + response2);
+          });
+          ///
+      });
+    }else{
+      
+    }
+}
+
+onPausarSus = function(){
+  conekta = document.getElementById("idConektaUser").value;
+
+  if (conekta == 0 || conekta == "0"){return;}
+
+  $.ajax({
+          method: "POST",
+          url: "_PausarSuscripcion.php",
+          dataType:"json",
+          data: { idConekta: conekta}
+          })
+          .done(function( responseConekta ) {
+            console.log(responseConekta);
+            if (responseConekta.status == "paused"){
+              document.getElementById("btnPausarSus").hidden = true;
+              document.getElementById("btnCancelarSus").hidden = true;
+              document.getElementById("btnReanudarSus").hidden = false;
+              document.getElementById("btnReactivarSus").hidden = true;
+            }
+          });
+}
+onReanudarSus = function(){
+  conekta = document.getElementById("idConektaUser").value;
+
+  if (conekta == 0 || conekta == "0"){return;}
+
+  $.ajax({
+          method: "POST",
+          url: "_ReanudarSuscripcion.php",
+          dataType:"json",
+          data: { idConekta: conekta}
+          })
+          .done(function( responseConekta ) {
+            console.log(responseConekta);
+            if (responseConekta.status == "active"){
+              document.getElementById("btnPausarSus").hidden = false;
+              document.getElementById("btnCancelarSus").hidden = false;
+              document.getElementById("btnReanudarSus").hidden = true;
+              document.getElementById("btnReactivarSus").hidden = true;
+            }
+          });
+}
+onCancelarSus = function(){
+  conekta = document.getElementById("idConektaUser").value;
+  tarjeta = document.getElementById("ultimos4tarjeta").value;
+
+  if (conekta == 0 || conekta == "0"){return;}
+
+  $.ajax({
+          method: "POST",
+          url: "_CancelarSuscripcion.php",
+          dataType:"json",
+          data: { idConekta: conekta}
+          })
+          .done(function( responseConekta ) {
+            console.log(responseConekta);
+            if (responseConekta.status == "canceled" && tarjeta != 0 && tarjeta != "0"){
+              document.getElementById("btnPausarSus").hidden = true;
+              document.getElementById("btnCancelarSus").hidden = true;
+              document.getElementById("btnReanudarSus").hidden = true;
+              document.getElementById("btnReactivarSus").hidden = false;
+            }
+          });
+}
+onActivarSuscripcion = function(){
+  conekta = document.getElementById("idConektaUser").value;
+
+  if (conekta == 0 || conekta == "0"){return;}
+
+  $.ajax({
+          method: "POST",
+          url: "_SuscripcionCliente.php",
+          dataType:"json",
+          data: { idConekta: conekta, plan: planID}
+          })
+          .done(function( responseConekta ) {
+            console.log(responseConekta);
+            if (responseConekta.status == "active"){
+              document.getElementById("btnPausarSus").hidden = false;
+              document.getElementById("btnCancelarSus").hidden = false;
+              document.getElementById("btnReanudarSus").hidden = true;
+              document.getElementById("btnReactivarSus").hidden = true;
+            }
+          });
+}
+onEliminarMetodoPago = function(){
+  conekta = document.getElementById("idConektaUser").value;
+
+  if (conekta == 0 || conekta == "0"){return;}
+
+  $.ajax({
+          method: "POST",
+          url: "_eliminarMetodoPago.php",
+          dataType:"json",
+          data: { idConekta: conekta}
+          })
+          .done(function( responseConekta ) {
+            console.log(responseConekta);
+            document.getElementById('Agregar').disabled=false;
+            document.getElementById("btnEliminarMetodo").hidden = true;
+              // document.getElementById("btnPausarSus").hidden = true;
+              // document.getElementById("btnCancelarSus").hidden = true;
+              // document.getElementById("btnReanudarSus").hidden = true;
+              // document.getElementById("btnReactivarSus").hidden = true;
+          });
+}
+
+asociarTarjeta = function(){
+  conekta = document.getElementById("idConektaUser").value;
+
+  if (conekta == 0 || conekta == "0"){return;}
+
+  $.ajax({
+          method: "POST",
+          url: "_soloAgregarMetodoPago.php",
+          dataType:"json",
+          data: { idConekta: conekta, token_id: tokenID}
+          })
+          .done(function( responseConekta ) {
+            // console.log(responseConekta);
+            //si hay error manda mensaje
+            if (!responseConekta.id){alert(responseConekta);return;}
+
+            alert("Nuevo Metodo de Pago Asociado");
+            document.getElementById('Agregar').disabled=true;
+            document.getElementById("btnEliminarMetodo").hidden = false;
+
+            document.getElementById("metodoPago").innerHTML = '<h5 class="card-header text-uppercase">Metodo de pago '+responseConekta.brand+'</h5>';
+              document.getElementById("nombreMetodo").innerHTML = '<h5 class="card-title">Nombre: '+responseConekta.name+'</h5>';
+              document.getElementById("ultimosCuatro").innerHTML = '<p class="card-text">Ultimos cuatro digitos: '+responseConekta.last4+'</p>';
+              document.getElementById("cardTipo").innerHTML = '<p class="card-text">Tipo: '+responseConekta.card_type+'</p>';
+              document.getElementById("btnEliminarMetodo").hidden = false;
+              document.getElementById("ultimos4tarjeta").value = responseConekta.last4;
+              
+          });
+}
+
+crearTokenVacio = function(){
+  //validar
+  telefonoU = document.getElementById("telefonoUser").value.length;
+  nombreU = document.getElementById("nombreUser").value.length;
+  emailU = document.getElementById("emailUser").value.length;
+  conekta = document.getElementById("idConektaUser").value;
+    
+  console.log(telefonoU);
+    if(telefonoU < 10 || telefonoU > 13){
+      document.getElementById("telefonoUser").classList.remove('is-valid');
+          document.getElementById("telefonoUser").classList.add("is-invalid");
+        document.getElementById("telefonoUserFeedback").innerHTML = '<span style="color: red;">Por favor introduzca un telefono valido</span>';
+        
+           $("#telefonoUserFeedback").removeClass('valid-feedback');
+           $("#telefonoUserFeedback").addClass('invalid-feedback');
+        return;
+    }else{
+      document.getElementById("telefonoUser").classList.remove('is-invalid');
+          document.getElementById("telefonoUser").classList.add("is-valid");
+          
+           document.getElementById("telefonoUserFeedback").innerHTML = '<span style="color: green;">Bien!</span>';
+           
+           $("#telefonoUserFeedback").removeClass('invalid-feedback');
+           $("#telefonoUserFeedback").addClass('valid-feedback');
+    }
+    if(nombreU == 0){
+        document.getElementById("nombreUserFeedback").innerHTML = '<span style="color: red;">Por favor introduzca un nombre valido</span>';
+        return;
+    }
+    if(emailU == 0){
+        document.getElementById("emailUserFeedback").innerHTML = '<span style="color: red;">Por favor introduzca un email valido</span>';
+        return;
+    }
+  // console.log("entre a tokenizar");
+    $.ajax({
+      method: "GET",
+      url: "tokenVacioLib.php",
+      dataType:"json"
+    })
+      .done(function( response ) {
+        // $("p.broken").html(response);
+          // console.log(response);
+        checkID = response.checkout.id;
+        tokenID = response.id;
+        // console.log(checkID);
+        // console.log(tokenID);
+        
+        if (checkID != 0){
+          // console.log(checkID);
+          //abrimos modal
+          var myModal = new bootstrap.Modal(document.getElementById('tarjetaModal'), {
+                    keyboard: false
+          });
+          myModal.show();
+
+          ///////////////////////////
+    window.ConektaCheckoutComponents.Card({
+      targetIFrame: "#conektaIframeContainer",
+//Este componente "allowTokenization" permite personalizar el tokenizador, por lo que su valor siempre será TRUE
+      allowTokenization: true, 
+      checkoutRequestId: checkID,//"8132d8a3-5919-4b88-a5e9-7be905f69134", // // Checkout request ID, es el mismo ID generado en el paso 1
+      publicKey: "key_L5Hf0pfKyuDmHx1TeY1N8OC", // Llaves: https://developers.conekta.com/docs/como-obtener-tus-api-keys
+      options: {
+        styles: {
+// inputType modifica el diseño del Web Checkout Tokenizer
+//        inputType: 'basic' // 'basic' | 'rounded' | 'line'
+          inputType: 'rounded',
+// buttonType modifica el diseño de los campos de llenado de información del  Web Checkout Tokenizer
+//        buttonType: 'basic' // 'basic' | 'rounded' | 'sharp'
+          buttonType: 'rounded',
+//Elemento que personaliza el borde de color de los elementos            
+          states: {
+            empty: {
+              borderColor: '#FFAA00' // Código de color hexadecimal para campos vacíos
+            },
+            invalid: {
+              borderColor: '#FF00E0' // Código de color hexadecimal para campos inválidos
+            },
+            valid: {
+              borderColor: '#0079c1' // Código de color hexadecimal para campos llenos y válidos
+            }
+          }
+        },
+        languaje: 'es', // 'es' Español | 'en' Ingles
+//Elemento que personaliza el botón que finzaliza el guardado y tokenización de la tarjeta
+        button: {
+          colorText: '#ffffff', // Código de color hexadecimal para el color de las palabrás en el botón de: Alta de Tarjeta | Add Card
+          //text: 'Agregar Tarjeta***', //Nombre de la acción en el botón ***Se puede personalizar
+          backgroundColor: '#301007' // Código de color hexadecimal para el color del botón de: Alta de Tarjeta | Add Card
+        },
+//Elemento que personaliza el diseño del iframe
+        iframe: {
+          colorText: '#65A39B',  // Código de color hexadecimal para el color de la letra de todos los campos a llenar
+          backgroundColor: '#FFFFFF' // Código de color hexadecimal para el fondo del iframe, generalmente es blanco.
+        }
+      },
+      onCreateTokenSucceeded: function(token) {
+        // console.log("token: " + token);
+        planUsuario = document.getElementById('planActual').value;
+        // onSuscribirse();
+        if (planUsuario == 0 || planUsuario == "0"){
+          SuscribirseCliente();
+        }else{
+          asociarTarjeta();
+        }
+        // document.getElementById('Suscribirse').disabled=false; 
+        document.getElementById('Agregar').disabled=true; 
+        $('#tarjetaModal').modal('hide');
+      },
+      onCreateTokenError: function(error) {
+        console.log(error)
+      }
+    })
+          //////////////////////
+        }
+ 
+      });
+  }
+
+
+//validar
+// Example starter JavaScript for disabling form submissions if there are invalid fields
+// (function () {
+//   'use strict'
+
+//   // Fetch all the forms we want to apply custom Bootstrap validation styles to
+//   var forms = document.querySelectorAll('.needs-validation')
+
+//   // Loop over them and prevent submission
+//   Array.prototype.slice.call(forms)
+//     .forEach(function (form) {
+//       form.addEventListener('onclick', function (event) {
+//         if (!form.checkValidity()) {
+//           event.preventDefault()
+//           event.stopPropagation()
+//         }
+
+//         form.classList.add('was-validated')
+//       }, false)
+//     })
+// })();
+
+  </script>
+  
+</body>
+</html>
